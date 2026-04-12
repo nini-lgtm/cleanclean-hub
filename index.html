@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>淨淨 CleanClean 營運管理中心</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--teal:#5BC5C2;--teal-dark:#4AB0AD;--teal-light:#E8F8F7;--bg:#f0f4f8;--card:#ffffff;--text:#1a2b3c;--text2:#6b7c8d;--shadow:0 4px 24px rgba(91,197,194,.12);--shadow-hover:0 8px 40px rgba(91,197,194,.22)}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);min-height:100vh;overflow-x:hidden}
+.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#5BC5C2 0%,#3A9E9B 50%,#2D8582 100%);display:flex;align-items:center;justify-content:center;z-index:1000;transition:opacity .5s,visibility .5s}
+.login-overlay.hidden{opacity:0;visibility:hidden}
+.login-box{background:#fff;border-radius:24px;padding:48px 40px;width:380px;max-width:90vw;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.logo-circle{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal-dark));display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;color:#fff;font-weight:900;letter-spacing:-1px;box-shadow:0 4px 20px rgba(91,197,194,.3)}
+.login-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--text2);margin-bottom:28px}
+.login-input{width:100%;padding:14px 18px;border:2px solid #e2e8f0;border-radius:12px;font-size:15px;text-align:center;letter-spacing:2px;transition:.2s;outline:none}
+.login-input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(91,197,194,.15)}
+.login-input.error{border-color:#ef4444;animation:shake .4s}
+.login-btn{width:100%;padding:14px;margin-top:16px;background:var(--teal);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:.2s}
+.login-btn:hover{background:var(--teal-dark);transform:translateY(-1px)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.main{opacity:0;transition:opacity .6s;padding:0 20px 40px}
+.main.show{opacity:1}
+.header{max-width:1200px;margin:0 auto;padding:32px 0 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand .logo-circle{width:48px;height:48px;font-size:18px;margin:0}
+.brand-text h1{font-size:24px;font-weight:800;color:var(--text)}
+.brand-text p{font-size:13px;color:var(--text2);margin-top:2px}
+.user-info{font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px}
+.user-dot{width:8px;height:8px;border-radius:50%;background:#22c55e}
+.logout-btn{background:none;border:1px solid #e2e8f0;padding:6px 14px;border-radius:8px;font-size:12px;color:var(--text2);cursor:pointer;transition:.2s}
+.logout-btn:hover{border-color:var(--teal);color:var(--teal)}
+.grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px}
+.card{background:var(--card);border-radius:20px;padding:32px;box-shadow:var(--shadow);transition:all .3s;cursor:pointer;text-decoration:none;color:inherit;position:relative;overflow:hidden;border:2px solid transparent}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover);border-color:var(--teal)}
+.card::before{content:'';position:absolute;top:0;left:0;width:100%;height:4px;background:linear-gradient(90deg,var(--teal),var(--teal-dark))}
+.card-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:20px}
+.card-icon.blue{background:rgba(59,130,246,.1)}
+.card-icon.green{background:rgba(34,197,94,.1)}
+.card-icon.orange{background:rgba(245,158,11,.1)}
+.card-icon.purple{background:rgba(139,92,246,.1)}
+.card h3{font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px}
+.card p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px}
+.card-tag{display:inline-block;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;background:var(--teal-light);color:var(--teal-dark)}
+.card-tag.live{background:#dcfce7;color:#16a34a}
+.card-tag.draft{background:#fef3c7;color:#d97706}
+.card-arrow{position:absolute;bottom:28px;right:28px;width:36px;height:36px;border-radius:10px;background:var(--teal-light);display:flex;align-items:center;justify-content:center;transition:.3s}
+.card:hover .card-arrow{background:var(--teal)}
+.card:hover .card-arrow svg{stroke:#fff}
+.card-arrow svg{width:18px;height:18px;stroke:var(--teal);stroke-width:2.5;fill:none}
+.footer{max-width:1200px;margin:40px auto 0;padding:24px 0;border-top:1px solid #e2e8f0;text-align:center;font-size:12px;color:var(--text2)}
+@media(max-width:700px){.header{padding:20px 0 16px}.brand-text h1{font-size:20px}.grid{grid-template-columns:1fr}.card{padding:24px}}
+</style>
+</head>
+<body>
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="logo-circle">淨</div>
+    <div class="login-title">淨淨營運管理中心</div>
+    <div class="login-sub">CleanClean Operations Hub</div>
+    <input class="login-input" id="pwdInput" type="password" placeholder="請輸入密碼" autocomplete="off">
+    <button class="login-btn" id="loginBtn">進入系統</button>
+  </div>
+</div>
+<div class="main" id="mainContent">
+  <div class="header">
+    <div class="brand">
+      <div class="logo-circle">淨</div>
+      <div class="brand-text">
+        <h1>淨淨營運管理中心</h1>
+        <p>CleanClean Operations Hub</p>
+      </div>
+    </div>
+    <div class="user-info">
+      <span class="user-dot"></span> 已登入
+      <button class="logout-btn" id="logoutBtn">登出</button>
+    </div>
+  </div>
+  <div class="grid">
+    <a class="card" href="https://nini-lgtm.github.io/cleanclean-dashboard/" target="_blank">
+      <div class="card-icon blue">📊</div>
+      <h3>財務儀表板</h3>
+      <p>營收、毛利、費用分析<br>月度趨勢與關鍵財務指標</p>
+      <span class="card-tag live">已上線</span>
+      <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </a>
+    <a class="card" href="https://nini-lgtm.github.io/cleanclean-inventory/" target="_blank">
+      <div class="card-icon green">📦</div>
+      <h3>庫存儀表板</h3>
+      <p>即時庫存狀態、補貨提醒<br>各通路存量追蹤管理</p>
+      <span class="card-tag live">已上線</span>
+      <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </a>
+    <a class="card" href="https://nini-lgtm.github.io/cleanclean-oem/" target="_blank">
+      <div class="card-icon orange">🏭</div>
+      <h3>OEM 代工管理</h3>
+      <p>代工訂單追蹤、生產排程<br>品質管控與交期管理</p>
+      <span class="card-tag draft">部署中</span>
+      <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </a>
+    <a class="card" href="https://nini-lgtm.github.io/cleanclean-operations/" target="_blank">
+      <div class="card-icon purple">⚙️</div>
+      <h3>營運儀表板</h3>
+      <p>整體營運指標總覽<br>跨部門數據整合分析</p>
+      <span class="card-tag draft">部署中</span>
+      <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </a>
+  </div>
+  <div class="footer">© 2025 淨淨 CleanClean — 營運管理中心 v1.0</div>
+</div>
+<script>
+const PWD='CLEAN07240902';
+if(sessionStorage.getItem('cc_auth')==='ok'){document.getElementById('loginOverlay').classList.add('hidden');document.getElementById('mainContent').classList.add('show')}
+function tryLogin(){const i=document.getElementById('pwdInput');if(i.value===PWD){sessionStorage.setItem('cc_auth','ok');document.getElementById('loginOverlay').classList.add('hidden');setTimeout(()=>document.getElementById('mainContent').classList.add('show'),300)}else{i.classList.add('error');setTimeout(()=>i.classList.remove('error'),400);i.value='';i.placeholder='密碼錯誤，請重新輸入'}}
+document.getElementById('loginBtn').addEventListener('click',tryLogin);
+document.getElementById('pwdInput').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin()});
+document.getElementById('logoutBtn').addEventListener('click',()=>{sessionStorage.removeItem('cc_auth');location.reload()});
+</script>
+</body>
+</html>
