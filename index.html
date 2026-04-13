@@ -1,152 +1,152 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>æ·¨æ·¨ CleanClean çéç®¡çä¸­å¿</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--teal:#5BC5C2;--teal-dark:#4AB0AD;--teal-light:#E8F8F7;--bg:#f0f4f8;--card:#ffffff;--text:#1a2b3c;--text2:#6b7c8d;--shadow:0 4px 24px rgba(91,197,194,.12);--shadow-hover:0 8px 40px rgba(91,197,194,.22)}
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);min-height:100vh;overflow-x:hidden}
-.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#5BC5C2 0%,#3A9E9B 50%,#2D8582 100%);display:flex;align-items:center;justify-content:center;z-index:1000;transition:opacity .5s,visibility .5s}
-.login-overlay.hidden{opacity:0;visibility:hidden}
-.login-box{background:#fff;border-radius:24px;padding:48px 40px;width:380px;max-width:90vw;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.15)}
-.logo-circle{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal-dark));display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;color:#fff;font-weight:900;letter-spacing:-1px;box-shadow:0 4px 20px rgba(91,197,194,.3)}
-.login-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:6px}
-.login-sub{font-size:13px;color:var(--text2);margin-bottom:28px}
-.login-input{width:100%;padding:14px 18px;border:2px solid #e2e8f0;border-radius:12px;font-size:15px;text-align:center;letter-spacing:2px;transition:.2s;outline:none}
-.login-input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(91,197,194,.15)}
-.login-input.error{border-color:#ef4444;animation:shake .4s}
-.login-btn{width:100%;padding:14px;margin-top:16px;background:var(--teal);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:.2s}
-.login-btn:hover{background:var(--teal-dark);transform:translateY(-1px)}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
-.main{opacity:0;transition:opacity .6s;padding:0 20px 40px}
-.main.show{opacity:1}
-.header{max-width:1200px;margin:0 auto;padding:32px 0 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
-.brand{display:flex;align-items:center;gap:14px}
-.brand .logo-circle{width:48px;height:48px;font-size:18px;margin:0}
-.brand-text h1{font-size:24px;font-weight:800;color:var(--text)}
-.brand-text p{font-size:13px;color:var(--text2);margin-top:2px}
-.user-info{font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px}
-.user-dot{width:8px;height:8px;border-radius:50%;background:#22c55e}
-.logout-btn{background:none;border:1px solid #e2e8f0;padding:6px 14px;border-radius:8px;font-size:12px;color:var(--text2);cursor:pointer;transition:.2s}
-.logout-btn:hover{border-color:var(--teal);color:var(--teal)}
-.grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px}
-.card{background:var(--card);border-radius:20px;padding:32px;box-shadow:var(--shadow);transition:all .3s;cursor:pointer;text-decoration:none;color:inherit;position:relative;overflow:hidden;border:2px solid transparent}
-.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover);border-color:var(--teal)}
-.card::before{content:'';position:absolute;top:0;left:0;width:100%;height:4px;background:linear-gradient(90deg,var(--teal),var(--teal-dark))}
-.card-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:20px}
-.card-icon.blue{background:rgba(59,130,246,.1)}
-.card-icon.green{background:rgba(34,197,94,.1)}
-.card-icon.orange{background:rgba(245,158,11,.1)}
-.card-icon.purple{background:rgba(139,92,246,.1)}
-.card h3{font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px}
-.card p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px}
-.card-tag{display:inline-block;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;background:var(--teal-light);color:var(--teal-dark)}
-.card-tag.live{background:#dcfce7;color:#16a34a}
-.card-tag.draft{background:#fef3c7;color:#d97706}
-.card-arrow{position:absolute;bottom:28px;right:28px;width:36px;height:36px;border-radius:10px;background:var(--teal-light);display:flex;align-items:center;justify-content:center;transition:.3s}
-.card:hover .card-arrow{background:var(--teal)}
-.card:hover .card-arrow svg{stroke:#fff}
-.card-arrow svg{width:18px;height:18px;stroke:var(--teal);stroke-width:2.5;fill:none}
-.footer{max-width:1200px;margin:40px auto 0;padding:24px 0;border-top:1px solid #e2e8f0;text-align:center;font-size:12px;color:var(--text2)}
-@media(max-width:700px){.header{padding:20px 0 16px}.brand-text h1{font-size:20px}.grid{grid-template-columns:1fr}.card{padding:24px}}
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>淨淨 CleanClean 營運管理中心</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: linear-gradient(135deg, #74b9af 0%, #7ec8bd 50%, #88d1c6 100%); min-height: 100vh; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #74b9af 0%, #7ec8bd 50%, #88d1c6 100%); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .login-box { background: white; border-radius: 20px; padding: 40px; width: 400px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+        .login-logo { width: 60px; height: 60px; background: #5ba99a; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white; }
+        .login-box h1 { font-size: 22px; color: #2d3748; margin-bottom: 5px; }
+        .login-box .subtitle { color: #718096; font-size: 14px; margin-bottom: 25px; }
+        .login-box input { width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 15px; margin-bottom: 15px; outline: none; }
+        .login-box input:focus { border-color: #5ba99a; }
+        .login-box button { width: 100%; padding: 12px; background: #5ba99a; color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; font-weight: 600; }
+        .login-box button:hover { background: #4a9488; }
+        .hidden { display: none !important; }
+        .header { background: white; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-logo { width: 40px; height: 40px; background: #5ba99a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; }
+        .header h1 { font-size: 20px; color: #2d3748; }
+        .header .sub { font-size: 12px; color: #718096; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .status-dot { width: 8px; height: 8px; background: #48bb78; border-radius: 50%; display: inline-block; }
+        .logout-btn { background: none; border: 1px solid #e2e8f0; padding: 6px 16px; border-radius: 8px; cursor: pointer; color: #718096; font-size: 13px; }
+        .logout-btn:hover { background: #f7fafc; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 24px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .card { background: white; border-radius: 16px; padding: 28px; text-decoration: none; color: inherit; transition: all 0.3s; border: 2px solid #e2e8f0; position: relative; display: block; }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); border-color: #5ba99a; }
+        .card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px; }
+        .card-icon.blue { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #2563eb; }
+        .card-icon.green { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #059669; }
+        .card-icon.orange { background: linear-gradient(135deg, #ffedd5, #fed7aa); color: #ea580c; }
+        .card-icon.purple { background: linear-gradient(135deg, #ede9fe, #ddd6fe); color: #7c3aed; }
         .card-icon.red { background: linear-gradient(135deg, #fee2e2, #fecaca); color: #dc2626; }
         .card-icon.teal { background: linear-gradient(135deg, #ccfbf1, #99f6e4); color: #0d9488; }
         .card-icon.pink { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: #db2777; }
-        </style>
+        .card h3 { font-size: 17px; color: #2d3748; margin-bottom: 8px; }
+        .card p { font-size: 13px; color: #718096; line-height: 1.6; margin-bottom: 16px; }
+        .card-tag { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+        .card-tag.live { background: #d1fae5; color: #059669; }
+        .card-tag.draft { background: #ede9fe; color: #7c3aed; }
+        .card-arrow { position: absolute; bottom: 28px; right: 28px; color: #cbd5e0; }
+        .card:hover .card-arrow { color: #5ba99a; }
+        .card-arrow svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .footer { text-align: center; padding: 30px; color: rgba(255,255,255,0.7); font-size: 13px; }
+        @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
-<div class="login-overlay" id="loginOverlay">
-  <div class="login-box">
-    <div class="logo-circle">æ·¨</div>
-    <div class="login-title">æ·¨æ·¨çéç®¡çä¸­å¿</div>
-    <div class="login-sub">CleanClean Operations Hub</div>
-    <input class="login-input" id="pwdInput" type="password" placeholder="è«è¼¸å¥å¯ç¢¼" autocomplete="off">
-    <button class="login-btn" id="loginBtn">é²å¥ç³»çµ±</button>
-  </div>
-</div>
-<div class="main" id="mainContent">
-  <div class="header">
-    <div class="brand">
-      <div class="logo-circle">æ·¨</div>
-      <div class="brand-text">
-        <h1>æ·¨æ·¨çéç®¡çä¸­å¿</h1>
-        <p>CleanClean Operations Hub</p>
-      </div>
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <div class="login-logo">淨</div>
+            <h1>淨淨 CleanClean 營運管理中心</h1>
+            <p class="subtitle">CleanClean Operations Hub</p>
+            <input type="password" id="pwdInput" placeholder="請輸入密碼">
+            <button onclick="checkPwd()">進入系統</button>
+        </div>
     </div>
-    <div class="user-info">
-      <span class="user-dot"></span> å·²ç»å¥
-      <button class="logout-btn" id="logoutBtn">ç»åº</button>
+    <div id="mainContent" class="hidden">
+        <div class="header">
+            <div class="header-left">
+                <div class="header-logo">淨</div>
+                <div><h1>淨淨 CleanClean 營運管理中心</h1><div class="sub">CleanClean Operations Hub</div></div>
+            </div>
+            <div class="header-right">
+                <span><span class="status-dot"></span> 已連線</span>
+                <button class="logout-btn" onclick="logout()">登出</button>
+            </div>
+        </div>
+        <div class="container">
+            <div class="grid">
+                <a class="card" href="https://nini-lgtm.github.io/cleanclean-dashboard/" target="_blank">
+                    <div class="card-icon blue">💰</div>
+                    <h3>財務儀表板</h3>
+                    <p>經營收入與支出分析<br>成本利潤與客客價分析</p>
+                    <span class="card-tag live">✅ Live</span>
+                    <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+                </a>
+                <a class="card" href="https://nini-lgtm.github.io/cleanclean-inventory/" target="_blank">
+                    <div class="card-icon green">📦</div>
+                    <h3>庫存儀表板</h3>
+                    <p>庫存管理與監控<br>商品進銷存分析</p>
+                    <span class="card-tag live">✅ Live</span>
+                    <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+                </a>
+                <a class="card" href="https://nini-lgtm.github.io/cleanclean-oem/" target="_blank">
+                    <div class="card-icon orange">🏭</div>
+                    <h3>OEM 代工管理</h3>
+                    <p>代工訂單與生產管理<br>代工廠商紾效追蹤</p>
+                    <span class="card-tag live">✅ Live</span>
+                    <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+                </a>
+                <a class="card" href="https://nini-lgtm.github.io/cleanclean-operations/" target="_blank">
+                    <div class="card-icon purple">📊</div>
+                    <h3>營運儀表板</h3>
+                    <p>營運效率與經營指標<br>營運流程與經營分析</p>
+                    <span class="card-tag live">✅ Live</span>
+                    <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+                </a>
+                <a class="card" href="https://nini-lgtm.github.io/cleanclean-procurement/" target="_blank">
+                    <div class="card-icon red">📦</div>
+                    <h3>採購儀表板</h3>
+                    <p>採購訂單管理、供應商追蹤<br>採購成本分析</p>
+                    <span class="card-tag live">✅ Live</span>
+                    <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+                </a>
+                <a class="card" href="https://nini-lgtm.github.io/Clean-HR/" target="_blank">
+                    <div class="card-icon teal">👥</div>
+                    <h3>人資儀表板</h3>
+                    <p>員工資料管理、薪資統計<br>人事分析報表</p>
+                    <span class="card-tag live">✅ Live</span>
+                    <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+                </a>
+                <a class="card" href="https://nini-lgtm.github.io/jj-quote/" target="_blank">
+                    <div class="card-icon pink">📋</div>
+                    <h3>報價單儀表板</h3>
+                    <p>報價單管理、客戶報價追蹤<br>報價成功率分析</p>
+                    <span class="card-tag live">✅ Live</span>
+                    <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+                </a>
+            </div>
+        </div>
+        <div class="footer">© 2025 淨淨 CleanClean 營運管理中心 v1.0</div>
     </div>
-  </div>
-  <div class="grid">
-    <a class="card" href="https://nini-lgtm.github.io/cleanclean-dashboard/" target="_blank">
-      <div class="card-icon blue">ð</div>
-      <h3>è²¡ååè¡¨æ¿</h3>
-      <p>çæ¶ãæ¯å©ãè²»ç¨åæ<br>æåº¦è¶¨å¢èééµè²¡åææ¨</p>
-      <span class="card-tag live">å·²ä¸ç·</span>
-      <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-    </a>
-    <a class="card" href="https://nini-lgtm.github.io/cleanclean-inventory/" target="_blank">
-      <div class="card-icon green">ð¦</div>
-      <h3>åº«å­åè¡¨æ¿</h3>
-      <p>å³æåº«å­çæãè£è²¨æé<br>åéè·¯å­éè¿½è¹¤ç®¡ç</p>
-      <span class="card-tag live">å·²ä¸ç·</span>
-      <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-    </a>
-    <a class="card" href="https://nini-lgtm.github.io/cleanclean-oem/" target="_blank">
-      <div class="card-icon orange">ð­</div>
-      <h3>OEM ä»£å·¥ç®¡ç</h3>
-      <p>ä»£å·¥è¨å®è¿½è¹¤ãçç¢æç¨<br>åè³ªç®¡æ§èäº¤æç®¡ç</p>
-      <span class="card-tag draft">é¨ç½²ä¸­</span>
-      <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-    </a>
-    <a class="card" href="https://nini-lgtm.github.io/cleanclean-operations/" target="_blank">
-      <div class="card-icon purple">âï¸</div>
-      <h3>çéåè¡¨æ¿</h3>
-      <p>æ´é«çéææ¨ç¸½è¦½<br>è·¨é¨éæ¸ææ´ååæ</p>
-      <span class="card-tag draft">é¨ç½²ä¸­</span>
-      <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-    </a>
-            <a class="card" href="https://nini-lgtm.github.io/cleanclean-procurement/" target="_blank">
-                <div class="card-icon red">📦</div>
-                <h3>採購儀表板</h3>
-                <p>採購訂單管理、供應商追蹤<br>採購成本分析</p>
-                <span class="card-tag live">✅ Live</span>
-                <div class="card-arrow">
-                    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-            </a>
-            <a class="card" href="https://nini-lgtm.github.io/Clean-HR/" target="_blank">
-                <div class="card-icon teal">👥</div>
-                <h3>人資儀表板</h3>
-                <p>員工資料管理、薪資統計<br>人事分析報表</p>
-                <span class="card-tag live">✅ Live</span>
-                <div class="card-arrow">
-                    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-            </a>
-            <a class="card" href="https://nini-lgtm.github.io/jj-quote/" target="_blank">
-                <div class="card-icon pink">📋</div>
-                <h3>報價單儀表板</h3>
-                <p>報價單管理、客戶報價追蹤<br>報價成功率分析</p>
-                <span class="card-tag live">✅ Live</span>
-                <div class="card-arrow">
-                    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </div>
-            </a>
-  </div>
-  <div class="footer">Â© 2025 æ·¨æ·¨ CleanClean â çéç®¡çä¸­å¿ v1.0</div>
-</div>
-<script>
-const PWD='CLEAN07240902';
-if(sessionStorage.getItem('cc_auth')==='ok'){document.getElementById('loginOverlay').classList.add('hidden');document.getElementById('mainContent').classList.add('show')}
-function tryLogin(){const i=document.getElementById('pwdInput');if(i.value===PWD){sessionStorage.setItem('cc_auth','ok');document.getElementById('loginOverlay').classList.add('hidden');setTimeout(()=>document.getElementById('mainContent').classList.add('show'),300)}else{i.classList.add('error');setTimeout(()=>i.classList.remove('error'),400);i.value='';i.placeholder='å¯ç¢¼é¯èª¤ï¼è«éæ°è¼¸å¥'}}
-document.getElementById('loginBtn').addEventListener('click',tryLogin);
-document.getElementById('pwdInput').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin()});
-document.getElementById('logoutBtn').addEventListener('click',()=>{sessionStorage.removeItem('cc_auth');location.reload()});
-</script>
+    <script>
+        const PWD = 'CLEAN07240902';
+        function checkPwd() {
+            if (document.getElementById('pwdInput').value === PWD) {
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                sessionStorage.setItem('hub_auth', '1');
+            } else { alert('密碼錯誤，請重試'); }
+        }
+        function logout() {
+            sessionStorage.removeItem('hub_auth');
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            document.getElementById('mainContent').classList.add('hidden');
+            document.getElementById('pwdInput').value = '';
+        }
+        document.getElementById('pwdInput').addEventListener('keypress', function(e) { if (e.key === 'Enter') checkPwd(); });
+        if (sessionStorage.getItem('hub_auth') === '1') {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
