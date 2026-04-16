@@ -347,13 +347,13 @@ async function checkAdmin(){
 }
 // GitHub API 直接存檔（網頁版自動部署）
 // Token 存在 localStorage，不寫在原始碼中（安全）
-const _GH={user:'nini-lgtm',repo:'jj-quote',branch:'master'};
+const _GH={user:'nini-lgtm',repo:'cleanclean-hub',branch:'main'};
 function getGHToken(){return localStorage.getItem('jj_gh_token')||'';}
 function setGHToken(t){localStorage.setItem('jj_gh_token',t);}
 // 從雲端拉最新資料（用於合併）
 async function fetchCloudData(){
   try{
-    const url='https://raw.githubusercontent.com/nini-lgtm/jj-quote/master/data.js?t='+Date.now();
+    const url='https://raw.githubusercontent.com/nini-lgtm/cleanclean-hub/main/data.js?t='+Date.now();
     const r=await fetch(url);
     if(!r.ok)return null;
     const txt=await r.text();
@@ -380,13 +380,13 @@ function mergeData(local,cloud){
 async function saveToGitHub(content){
   let token=getGHToken();
   if(!token){
-    token=prompt('首次使用 GitHub 自動部署，請輸入 GitHub Personal Access Token：\n\n（到 GitHub → Settings → Developer settings →\nFine-grained tokens 建立，\n只需給 jj-quote repo 的 Contents 讀寫權限）');
+    token=prompt('首次使用 GitHub 自動部署，請輸入 GitHub Personal Access Token：\n\n（到 GitHub → Settings → Developer settings →\nFine-grained tokens 建立，\n只需給 cleanclean-hub repo 的 Contents 讀寫權限）');
     if(!token)throw new Error('未輸入 Token，取消部署');
     setGHToken(token);
   }
   const api='https://api.github.com';
   const path='data.js';
-  const headers={'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json','User-Agent':'jj-quote-deploy'};
+  const headers={'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json','User-Agent':'cleanclean-hub-deploy'};
   let sha=null;
   try{
     const r=await fetch(api+'/repos/'+_GH.user+'/'+_GH.repo+'/contents/'+path+'?ref='+_GH.branch,{headers});
@@ -489,7 +489,7 @@ useEffect(()=>{
 const syncFromCloud=async()=>{
   if(!confirm('將從雲端載入最新資料，本機未儲存的變更會遺失。確定繼續？'))return;
   try{
-    const url='https://raw.githubusercontent.com/nini-lgtm/jj-quote/master/data.js?t='+Date.now();
+    const url='https://raw.githubusercontent.com/nini-lgtm/cleanclean-hub/main/data.js?t='+Date.now();
     const r=await fetch(url);
     if(!r.ok)throw new Error('HTTP '+r.status);
     const txt=await r.text();
