@@ -940,6 +940,8 @@ function CustomerDashboard(){
       </div>
 
       <TopProducts cli={cli} yearF={yearF} monthF={monthF}/>
+
+      <ClientTxnDetail cli={cli} yearF={yearF} monthF={monthF}/>
     </>}
   </div>);
 }
@@ -1962,4 +1964,63 @@ return(<div>
 ReactDOM.render(<App/>,document.getElementById('root'));
 </script>
 </body>
-</html>
+</html>/* 客戶交易明細（IEA） — 從 recentSales 挑出該客戶的單筆紀錄 */
+function ClientTxnDetail({cli,yearF,monthF}){
+  const[page,setPage]=useState(0);
+  const pSize=50;
+  const rows = useMemo(()=>{
+    const rs=M.recentSales||[];
+    return rs.filter(s=>{
+      if(s.cc!==cli.code)return false;
+      if(isMaterial(s.pn))return false;
+      const y=s.d.slice(0,4),m=s.d.slice(5,7);
+      if(yearF!=='all'&&y!==yearF)return false;
+      if(monthF!=='all'&&m!==String(monthF).padStart(2,'0'))return false;
+      return true;
+    }).sort((a,b)=>b.d.localeCompare(a.d));
+  },[cli,yearF,monthF]);
+  useEffect(()=>{setPage(0)},[cli,yearF,monthF]);
+  const total=rows.length;
+  const pageCount=Math.ceil(total/pSize);
+  const show=rows.slice(page*pSize,(page+1)*pSize);
+  const sum=rows.reduce((a,r)=>({q:a.q+r.q,rev:a.rev+r.r,pr:a.pr+r.pr}),{q:0,rev:0,pr:0});
+  const periodLabel=(yearF==='all'?'全部':yearF+'年')+(monthF==='all'?'':' '+monthF+'月');
+  return(<div className="card" style={{padding:16,marginBottom:16}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8,flexWrap:'wrap',gap:8}}>
+      <h3 style={{fontSize:14,fontWeight:600}}>📋 交易明細（{periodLabel}）<span style={{fontSize:11,fontWeight:400,color:'#94a3b8',marginLeft:8}}>共 {total} 筆</span></h3>
+      <div style={{fontSize:12,color:'#64748b'}}>合計：數量 {Math.round(sum.q).toLocaleString()} ｜ 營業額 <b>${Math.round(sum.rev).toLocaleString()}</b> ｜ 毛利 <b style={{color:sum.pr>=0?'#059669':'#dc2626'}}>${Math.round(sum.pr).toLocaleString()}</b></div>
+    </div>
+    {total===0&&<div style={{padding:24,textAlign:'center',color:'#94a3b8',fontSize:12}}>此期間無明細紀錄<br/><span style={{fontSize:11}}>（明細僅涵蓋最近 180 天；如需更早期資料請重跑 master.js）</span></div>}
+    {total>0&&<><div style={{maxHeight:420,overflow:'auto',borderRadius:8}}>
+      <table style={{fontSize:12,width:'100%',tableLayout:'fixed'}}>
+        <colgroup><col style={{width:90}}/><col style={{width:110}}/><col/><col style={{width:70}}/><col style={{width:110}}/><col style={{width:110}}/><col style={{width:80}}/></colgroup>
+        <thead><tr>
+          <th style={{padding:'6px 10px'}}>日期</th>
+          <th style={{padding:'6px 10px'}}>單號</th>
+          <th style={{padding:'6px 10px'}}>產品</th>
+          <th style={{textAlign:'right',padding:'6px 10px'}}>數量</th>
+          <th style={{textAlign:'right',padding:'6px 10px'}}>營業額</th>
+          <th style={{textAlign:'right',padding:'6px 10px'}}>毛利</th>
+          <th style={{padding:'6px 10px'}}>業務</th>
+        </tr></thead>
+        <tbody>{show.map((r,i)=><tr key={i}>
+          <td style={{padding:'5px 10px',whiteSpace:'nowrap'}}>{r.d}</td>
+          <td style={{padding:'5px 10px',fontSize:11,color:'#64748b',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}} title={r.dn}>{r.dn}</td>
+          <td style={{padding:'5px 10px',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}} title={r.pn}>{r.pn}</td>
+          <td style={{textAlign:'right',padding:'5px 10px'}}>{Math.round(r.q).toLocaleString()}</td>
+          <td style={{textAlign:'right',padding:'5px 10px'}}>${Math.round(r.r).toLocaleString()}</td>
+          <td style={{textAlign:'right',padding:'5px 10px',color:r.pr>=0?'#059669':'#dc2626'}}>${Math.round(r.pr).toLocaleString()}</td>
+          <td style={{padding:'5px 10px',fontSize:11,color:'#64748b',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}} title={r.s}>{r.s}</td>
+        </tr>)}</tbody>
+      </table>
+    </div>
+    {pageCount>1&&<div style={{display:'flex',justifyContent:'center',alignItems:'center',gap:8,marginTop:10,fontSize:12}}>
+      <button onClick={()=>setPage(Math.max(0,page-1))} disabled={page===0} className="bs" style={{padding:'4px 10px',fontSize:12,opacity:page===0?.5:1}}>上一頁</button>
+      <span style={{color:'#64748b'}}>第 {page+1} / {pageCount} 頁</span>
+      <button onClick={()=>setPage(Math.min(pageCount-1,page+1))} disabled={page>=pageCount-1} className="bs" style={{padding:'4px 10px',fontSize:12,opacity:page>=pageCount-1?.5:1}}>下一頁</button>
+    </div>}
+    </>}
+  </div>);
+}
+
+
