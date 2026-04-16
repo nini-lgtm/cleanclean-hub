@@ -57,12 +57,93 @@ input[type=range]{width:100%;cursor:pointer}
 </style>
 </head>
 <body>
+<div id="lock-screen">
+<div id="lock-box">
+<div style="font-size:40px;margin-bottom:12px">&#128274;</div>
+<h2>淨淨報價管理系統</h2>
+<p>請輸入密碼以進入系統</p>
+<input type="password" id="pw-input" placeholder="請輸入密碼" autofocus onkeydown="if(event.key==='Enter')checkPw()"/>
+<div class="err" id="pw-err"></div>
+<div style="margin-top:16px;font-size:12px;color:#64748b;text-align:left">
+  閒置自動登出：
+  <select id="idle-sel" style="padding:4px 8px;border:1px solid #d0ecef;border-radius:6px;font-size:12px;margin-left:4px">
+    <option value="15">15 分鐘</option>
+    <option value="30" selected>30 分鐘</option>
+    <option value="60">1 小時</option>
+    <option value="240">4 小時</option>
+    <option value="0">不登出</option>
+  </select>
+</div>
+<button onclick="checkPw()">進入系統</button>
+</div>
+</div>
 <script>
-// sha256 保留供管理員密碼驗證用
 async function sha256(str){
   var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
 }
+var _H='35f0fe053efba23746502e427f547856d115174e27c4c1e564f8e050a77f328c';
+// 閒置超時 (分鐘)，存 localStorage 讓下次重訪記得設定
+var IDLE_KEY='jj_idle_min';
+var ACT_KEY='jj_last_activity';
+function getIdleMin(){return parseInt(localStorage.getItem(IDLE_KEY)||'30',10)}
+function setIdleMin(n){localStorage.setItem(IDLE_KEY,String(n))}
+function touchActivity(){localStorage.setItem(ACT_KEY,String(Date.now()))}
+async function checkPw(){
+  var pw=document.getElementById('pw-input').value;
+  var h=await sha256(pw);
+  if(h===_H){
+    var m=parseInt(document.getElementById('idle-sel').value,10);
+    setIdleMin(m);
+    localStorage.setItem('jj_unlocked','1');
+    touchActivity();
+    document.getElementById('lock-screen').style.display='none';
+    startIdleWatch();
+  }else{
+    document.getElementById('pw-err').textContent='密碼錯誤，請重新輸入';
+    document.getElementById('pw-input').value='';
+    document.getElementById('pw-input').focus();
+  }
+}
+function lockNow(){
+  localStorage.removeItem('jj_unlocked');
+  document.getElementById('lock-screen').style.display='flex';
+  document.getElementById('pw-input').value='';
+  document.getElementById('pw-input').focus();
+}
+var _idleTimer=null;
+function startIdleWatch(){
+  var m=getIdleMin();
+  if(!m)return; // 0 = 不登出
+  ['mousemove','keydown','click','touchstart','scroll'].forEach(function(ev){
+    document.addEventListener(ev,function(){touchActivity()},{passive:true});
+  });
+  if(_idleTimer)clearInterval(_idleTimer);
+  _idleTimer=setInterval(function(){
+    var last=parseInt(localStorage.getItem(ACT_KEY)||'0',10);
+    var mm=getIdleMin();if(!mm)return;
+    if(Date.now()-last > mm*60*1000){
+      clearInterval(_idleTimer);
+      lockNow();
+    }
+  },30000); // 每 30 秒檢查
+}
+// 初始化：已登入且未超時 → 直接進入
+(function(){
+  // 同步目前設定值到選單
+  try{document.getElementById('idle-sel').value=String(getIdleMin())}catch(e){}
+  if(localStorage.getItem('jj_unlocked')==='1'){
+    var last=parseInt(localStorage.getItem(ACT_KEY)||'0',10);
+    var m=getIdleMin();
+    if(!m || Date.now()-last < m*60*1000){
+      document.getElementById('lock-screen').style.display='none';
+      touchActivity();
+      startIdleWatch();
+    }else{
+      localStorage.removeItem('jj_unlocked');
+    }
+  }
+})();
 </script>
 <div id="root"></div>
 <script>
