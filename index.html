@@ -1961,10 +1961,7 @@ return(<div>
 </div>);
 }
 
-ReactDOM.render(<App/>,document.getElementById('root'));
-</script>
-</body>
-</html>/* 客戶交易明細（IEA） — 從 recentSales 挑出該客戶的單筆紀錄 */
+/* 客戶交易明細（IEA） — 從 recentSales 挑出該客戶的單筆紀錄 */
 function ClientTxnDetail({cli,yearF,monthF}){
   const[page,setPage]=useState(0);
   const pSize=50;
@@ -2023,4 +2020,7 @@ function ClientTxnDetail({cli,yearF,monthF}){
   </div>);
 }
 
-
+ReactDOM.render(<App/>,document.getElementById('root'));
+</script>
+</body>
+</html>
