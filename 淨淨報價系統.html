@@ -724,11 +724,11 @@ return(<div style={{display:'flex',minHeight:'100vh'}}>
 <div style={{flex:1,padding:'16px 0'}}>
 {GROUPS.map(g=>(
 <div key={g.k} style={{marginBottom:18}}>
-<div style={{fontSize:11,letterSpacing:1,opacity:.7,padding:'0 20px 8px',fontWeight:600}}>{g.label}</div>
+<div style={{fontSize:16,letterSpacing:1,opacity:.95,padding:'0 20px 10px',fontWeight:700}}>{g.label}</div>
 {g.tabs.map(t=>{
 const i=TABS.indexOf(t);
 const active=tab===i;
-return <div key={i} onClick={()=>setTab(i)} style={{padding:'10px 20px',cursor:'pointer',background:active?'rgba(255,255,255,.18)':'transparent',borderLeft:active?'3px solid #fff':'3px solid transparent',fontSize:13.5,fontWeight:active?600:400,transition:'background .15s'}} onMouseEnter={e=>{if(!active)e.currentTarget.style.background='rgba(255,255,255,.08)'}} onMouseLeave={e=>{if(!active)e.currentTarget.style.background='transparent'}}>{t}</div>;
+return <div key={i} onClick={()=>setTab(i)} style={{padding:'10px 20px',cursor:'pointer',background:active?'rgba(255,255,255,.18)':'transparent',borderLeft:active?'3px solid #fff':'3px solid transparent',fontSize:14.5,fontWeight:active?600:500,transition:'background .15s'}} onMouseEnter={e=>{if(!active)e.currentTarget.style.background='rgba(255,255,255,.08)'}} onMouseLeave={e=>{if(!active)e.currentTarget.style.background='transparent'}}>{t}</div>;
 })}
 </div>
 ))}
