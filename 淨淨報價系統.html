@@ -840,8 +840,8 @@ function TopProducts({cli,yearF,monthF}){
       </div>
     </div>
     {mode==='period'&&data.length===0&&<div style={{padding:20,textAlign:'center',color:'#94a3b8',fontSize:12}}>此期間無交易明細<br/><span style={{fontSize:11}}>（依年月查詢僅涵蓋最近 180 天明細）</span></div>}
-    {data.length>0&&<table style={{fontSize:12}}><thead><tr><th>產品</th><th style={{textAlign:'right'}}>數量</th><th style={{textAlign:'right'}}>營業額</th><th style={{textAlign:'right'}}>毛利</th></tr></thead>
-      <tbody>{data.map((p,i)=><tr key={i}><td>{p.name}</td><td style={{textAlign:'right'}}>{Math.round(p.q).toLocaleString()}</td><td style={{textAlign:'right'}}>${Math.round(p.r).toLocaleString()}</td><td style={{textAlign:'right',color:p.pr>=0?'#059669':'#dc2626'}}>${Math.round(p.pr).toLocaleString()}</td></tr>)}</tbody></table>}
+    {data.length>0&&<div style={{maxWidth:780}}><table style={{fontSize:12,width:'100%',tableLayout:'fixed'}}><colgroup><col style={{width:'40%'}}/><col style={{width:'18%'}}/><col style={{width:'21%'}}/><col style={{width:'21%'}}/></colgroup><thead><tr><th style={{padding:'6px 10px'}}>產品</th><th style={{textAlign:'right',padding:'6px 10px'}}>數量</th><th style={{textAlign:'right',padding:'6px 10px'}}>營業額</th><th style={{textAlign:'right',padding:'6px 10px'}}>毛利</th></tr></thead>
+      <tbody>{data.map((p,i)=><tr key={i}><td style={{padding:'5px 10px',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}} title={p.name}>{p.name}</td><td style={{textAlign:'right',padding:'5px 10px'}}>{Math.round(p.q).toLocaleString()}</td><td style={{textAlign:'right',padding:'5px 10px'}}>${Math.round(p.r).toLocaleString()}</td><td style={{textAlign:'right',padding:'5px 10px',color:p.pr>=0?'#059669':'#dc2626'}}>${Math.round(p.pr).toLocaleString()}</td></tr>)}</tbody></table></div>}
   </div>);
 }
 
