@@ -455,10 +455,10 @@ const CL0=[
 
 // 兩層導覽：群組 → 分頁
 const GROUPS=[
-  {k:'manage',label:'📊 經營管理',tabs:['客戶儀表板','客戶主檔','產品主檔','銷售分析']},
+  {k:'manage',label:'📊 經營管理',tabs:['客戶儀表板','客戶主檔','銷售分析']},
   {k:'quote',label:'💰 報價系統',tabs:['報價試算','場次總表','產品定價','組合設定','數據分析']},
 ];
-const TABS=['客戶儀表板','客戶主檔','產品主檔','銷售分析','報價試算','場次總表','產品定價','組合設定','數據分析'];
+const TABS=['客戶儀表板','客戶主檔','銷售分析','報價試算','場次總表','產品定價','組合設定','數據分析'];
 
 function App(){
 const[tab,setTab]=useState(0);
@@ -759,13 +759,12 @@ return <div key={i} onClick={()=>setTab(i)} style={{padding:'10px 20px',cursor:'
 </div></div>}
 {tab===0&&<CustomerDashboard/>}
 {tab===1&&<MasterClients/>}
-{tab===2&&<MasterProducts/>}
-{tab===3&&<SalesAnalytics/>}
-{tab===4&&<T3 products={products} combos={combos} clients={clients} sCl={sCl} events={events} sE={sE}/>}
-{tab===5&&<T5 events={events} sE={sE} products={products} combos={combos}/>}
-{tab===6&&<T1 products={products} sP={sP}/>}
-{tab===7&&<T2 combos={combos} sC={sC} products={products}/>}
-{tab===8&&<T4 products={products} combos={combos} events={events} clients={clients}/>}
+{tab===2&&<SalesAnalytics/>}
+{tab===3&&<T3 products={products} combos={combos} clients={clients} sCl={sCl} events={events} sE={sE}/>}
+{tab===4&&<T5 events={events} sE={sE} products={products} combos={combos}/>}
+{tab===5&&<T1 products={products} sP={sP}/>}
+{tab===6&&<T2 combos={combos} sC={sC} products={products}/>}
+{tab===7&&<T4 products={products} combos={combos} events={events} clients={clients}/>}
 </main>
 </div></div>);
 }
