@@ -917,6 +917,12 @@ function Overview({setTab}){
   const arTotal = Object.values(ar).reduce((a,v)=>a+(v.amt||0),0);
   const arOverdue = Object.values(ar).reduce((a,v)=>a+(v.b90||0)+(v.b90p||0),0);
   const arClients = Object.keys(ar).length;
+  // 未開發票
+  const missing = M.missingInvoices||[];
+  const miUncleared = missing.filter(d=>d.cleared!=='Y');
+  const miTotal = missing.reduce((a,d)=>a+d.amt,0);
+  const miUnpaidTotal = miUncleared.reduce((a,d)=>a+d.amt,0);
+  const miClients = new Set(missing.map(d=>d.cc)).size;
   // Top 5 客戶（累計）
   const sbc = M.salesByClient||{};
   const topClients = (M.clients||[]).map(c=>({...c,s:sbc[c.code]})).filter(c=>c.s&&c.s.t>0).sort((a,b)=>b.s.t-a.s.t).slice(0,5);
@@ -984,14 +990,24 @@ function Overview({setTab}){
       </div>
     </div>
 
-    {/* A/R 警示 + 健康度警示 */}
-    {(arTotal>0||healthAlerts.length>0)&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:12,marginBottom:16}}>
+    {/* A/R 警示 + 未開發票 + 健康度警示 */}
+    {(arTotal>0||missing.length>0||healthAlerts.length>0)&&<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:12,marginBottom:16}}>
       {arTotal>0&&<div className="card" onClick={()=>setTab(4)} style={{padding:16,cursor:'pointer',border:arOverdue>0?'2px solid #dc2626':'2px solid #f59e0b',background:arOverdue>0?'#fef2f2':'#fffbeb'}}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
           <div>
             <div style={{fontSize:12,color:arOverdue>0?'#dc2626':'#b45309',fontWeight:600}}>{arOverdue>0?'🚨 應收帳款（含逾期）':'⚠️ 應收帳款'}</div>
             <div style={{fontSize:26,fontWeight:700,color:arOverdue>0?'#dc2626':'#b45309',marginTop:4}}>${Math.round(arTotal).toLocaleString()}</div>
             <div style={{fontSize:11,color:'#64748b',marginTop:4}}>{arClients} 家未收 ｜ 逾 90 天 <b style={{color:'#dc2626'}}>${Math.round(arOverdue).toLocaleString()}</b></div>
+          </div>
+          <div style={{fontSize:11,color:'#64748b'}}>點擊查看 →</div>
+        </div>
+      </div>}
+      {missing.length>0&&<div className="card" onClick={()=>setTab(4)} style={{padding:16,cursor:'pointer',border:'2px solid #7c3aed',background:'#faf5ff'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+          <div>
+            <div style={{fontSize:12,color:'#6d28d9',fontWeight:600}}>🧾 未開立發票</div>
+            <div style={{fontSize:26,fontWeight:700,color:'#6d28d9',marginTop:4}}>${Math.round(miTotal).toLocaleString()}</div>
+            <div style={{fontSize:11,color:'#64748b',marginTop:4}}>{missing.length} 筆 ｜ {miClients} 家客戶 ｜ 未結清 <b style={{color:'#dc2626'}}>${Math.round(miUnpaidTotal).toLocaleString()}</b></div>
           </div>
           <div style={{fontSize:11,color:'#64748b'}}>點擊查看 →</div>
         </div>
@@ -1045,21 +1061,51 @@ function Overview({setTab}){
 
 /* ==================== 💳 應收帳款總覽 ==================== */
 function ARPage(){
-  const ar = M.receivables||{};
   const details = M.receivableDetails||[];
+  const missing = M.missingInvoices||[];
   const clients = M.clients||[];
   const[sort,setSort]=useState('amt'); // amt / days
   const[filter,setFilter]=useState('all'); // all / overdue / b90p
   const[q,setQ]=useState('');
+  const[yearF,setYearF]=useState('all');
+  const[monthF,setMonthF]=useState('all');
   const[expanded,setExpanded]=useState(null); // cc
+  const[showMissing,setShowMissing]=useState(false);
 
   const clientNameMap = {};
   clients.forEach(c=>clientNameMap[c.code]=c);
 
-  let rows = Object.entries(ar).map(([cc,v])=>{
-    const c = clientNameMap[cc]||{name:'',sales:''};
-    const maxDays = details.filter(d=>d.cc===cc).reduce((a,d)=>Math.max(a,d.days),0);
-    return {cc,name:c.name,sales:c.sales,...v,maxDays};
+  // 所有可選年份（從未收 + 未開發票 明細擷取）
+  const allYears = useMemo(()=>{
+    const s = new Set();
+    details.forEach(d=>{if(d.d)s.add(d.d.slice(0,4))});
+    missing.forEach(d=>{if(d.d)s.add(d.d.slice(0,4))});
+    return [...s].sort().reverse();
+  },[]);
+
+  const yearMatch = d => yearF==='all' || (d && d.startsWith(yearF));
+  const monthMatch = d => monthF==='all' || (d && d.slice(5,7)===monthF);
+
+  // 依年月篩選明細，再重新按客戶彙總
+  const filteredDetails = details.filter(d=>yearMatch(d.d)&&monthMatch(d.d));
+  const byClient = useMemo(()=>{
+    const agg = {};
+    filteredDetails.forEach(d=>{
+      const k = d.cc;
+      if(!agg[k]) agg[k] = {cc:k,cnt:0,amt:0,b30:0,b60:0,b90:0,b90p:0,oldest:'',maxDays:0};
+      agg[k].cnt += 1;
+      agg[k].amt += d.unpaid;
+      const b = d.days<=30?'b30':d.days<=60?'b60':d.days<=90?'b90':'b90p';
+      agg[k][b] += d.unpaid;
+      if(!agg[k].oldest || d.d<agg[k].oldest) agg[k].oldest = d.d;
+      if(d.days>agg[k].maxDays) agg[k].maxDays = d.days;
+    });
+    return agg;
+  },[yearF,monthF]);
+
+  let rows = Object.values(byClient).map(v=>{
+    const c = clientNameMap[v.cc]||{name:'',sales:''};
+    return {...v,name:c.name,sales:c.sales};
   });
   if(filter==='overdue') rows = rows.filter(r=>r.b90>0||r.b90p>0);
   if(filter==='b90p') rows = rows.filter(r=>r.b90p>0);
@@ -1070,17 +1116,49 @@ function ARPage(){
   const totalB90 = rows.reduce((a,r)=>a+(r.b90||0)+(r.b90p||0),0);
   const totalB90p = rows.reduce((a,r)=>a+(r.b90p||0),0);
 
+  // 未開發票：依篩選 + 依客戶分組
+  const filteredMissing = missing.filter(d=>yearMatch(d.d)&&monthMatch(d.d));
+  const missingByClient = useMemo(()=>{
+    const agg = {};
+    filteredMissing.forEach(d=>{
+      if(!agg[d.cc]) agg[d.cc] = {cc:d.cc,cn:d.cn,cnt:0,amt:0,unpaid:0,cleared:0,rows:[]};
+      agg[d.cc].cnt += 1;
+      agg[d.cc].amt += d.amt;
+      agg[d.cc].unpaid += d.unpaid;
+      if(d.cleared==='Y') agg[d.cc].cleared += 1;
+      agg[d.cc].rows.push(d);
+    });
+    return Object.values(agg).sort((a,b)=>b.amt-a.amt);
+  },[yearF,monthF]);
+  const mTotalAmt = filteredMissing.reduce((a,d)=>a+d.amt,0);
+  const mTotalUnpaid = filteredMissing.reduce((a,d)=>a+d.unpaid,0);
+
   return(<div>
     <h2 style={{fontSize:18,fontWeight:600,marginBottom:16}}>💳 應收帳款</h2>
 
+    {/* KPI 卡 */}
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:12,marginBottom:16}}>
       <div className="sc s1"><div style={{fontSize:12,opacity:.9}}>未收總額</div><div style={{fontSize:22,fontWeight:700}}>${Math.round(totalAmt).toLocaleString()}</div><div style={{fontSize:11,opacity:.85,marginTop:4}}>{rows.length} 家客戶</div></div>
       <div className="sc" style={{background:'linear-gradient(135deg,#b45309,#f59e0b)'}}><div style={{fontSize:12,opacity:.9}}>逾 60 天以上</div><div style={{fontSize:22,fontWeight:700}}>${Math.round(totalB90).toLocaleString()}</div><div style={{fontSize:11,opacity:.85,marginTop:4}}>占 {totalAmt>0?(totalB90/totalAmt*100).toFixed(1):0}%</div></div>
       <div className="sc" style={{background:'linear-gradient(135deg,#991b1b,#dc2626)'}}><div style={{fontSize:12,opacity:.9}}>逾 90 天以上</div><div style={{fontSize:22,fontWeight:700}}>${Math.round(totalB90p).toLocaleString()}</div><div style={{fontSize:11,opacity:.85,marginTop:4}}>占 {totalAmt>0?(totalB90p/totalAmt*100).toFixed(1):0}%</div></div>
+      <div className="sc" style={{background:'linear-gradient(135deg,#7c3aed,#a78bfa)',cursor:filteredMissing.length?'pointer':'default'}} onClick={()=>filteredMissing.length&&setShowMissing(!showMissing)}>
+        <div style={{fontSize:12,opacity:.9}}>🧾 未開發票</div>
+        <div style={{fontSize:22,fontWeight:700}}>${Math.round(mTotalAmt).toLocaleString()}</div>
+        <div style={{fontSize:11,opacity:.85,marginTop:4}}>{filteredMissing.length} 筆 ｜ {missingByClient.length} 家客戶 {filteredMissing.length>0&&<span style={{marginLeft:4}}>{showMissing?'▼':'▶'}</span>}</div>
+      </div>
     </div>
 
-    <div className="card" style={{padding:12,marginBottom:16}}>
+    {/* 年月 + 篩選 + 搜尋 */}
+    <div className="card sticky-bar" style={{padding:12,marginBottom:16,position:'sticky',top:56,zIndex:20,background:'#fff',boxShadow:'0 2px 8px rgba(0,0,0,.04)'}}>
       <div style={{display:'flex',gap:8,alignItems:'flex-end',flexWrap:'wrap'}}>
+        <F l="年度"><select value={yearF} onChange={e=>setYearF(e.target.value)} style={{minWidth:90}}>
+          <option value="all">全部</option>
+          {allYears.map(y=><option key={y} value={y}>{y}</option>)}
+        </select></F>
+        <F l="月份"><select value={monthF} onChange={e=>setMonthF(e.target.value)} style={{minWidth:80}}>
+          <option value="all">全部</option>
+          {MONTHS.map(m=><option key={m} value={m}>{m}</option>)}
+        </select></F>
         <F l="篩選"><select value={filter} onChange={e=>setFilter(e.target.value)}>
           <option value="all">全部未收</option>
           <option value="overdue">逾 60 天以上</option>
@@ -1094,6 +1172,55 @@ function ARPage(){
       </div>
     </div>
 
+    {/* 未開發票通知區（展開後顯示） */}
+    {showMissing&&filteredMissing.length>0&&<div className="card" style={{padding:16,marginBottom:16,border:'2px solid #7c3aed',background:'#faf5ff'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+        <h3 style={{fontSize:14,fontWeight:600,color:'#6d28d9'}}>🧾 未開立發票清單</h3>
+        <div style={{fontSize:12,color:'#64748b'}}>合計 {filteredMissing.length} 筆 ｜ 金額 ${Math.round(mTotalAmt).toLocaleString()} ｜ 未收 ${Math.round(mTotalUnpaid).toLocaleString()}</div>
+      </div>
+      <div style={{maxHeight:320,overflow:'auto',background:'#fff',borderRadius:6,border:'1px solid #e9d5ff'}}>
+        <table style={{fontSize:12,width:'100%'}}>
+          <thead style={{background:'#f3e8ff',position:'sticky',top:0}}><tr>
+            <th style={{padding:'6px 10px',textAlign:'left'}}>客戶</th>
+            <th style={{padding:'6px 10px',textAlign:'right'}}>筆數</th>
+            <th style={{padding:'6px 10px',textAlign:'right'}}>金額</th>
+            <th style={{padding:'6px 10px',textAlign:'right'}}>未收</th>
+            <th style={{padding:'6px 10px',textAlign:'right'}}>已收/已結清</th>
+          </tr></thead>
+          <tbody>{missingByClient.map((c,i)=>{const exp=expanded==='mi_'+c.cc;return(<React.Fragment key={c.cc}>
+            <tr onClick={()=>setExpanded(exp?null:'mi_'+c.cc)} style={{cursor:'pointer',borderTop:'1px solid #f1f5f9'}}>
+              <td style={{padding:'6px 10px'}}>{exp?'▼':'▶'} {c.cn} <span style={{color:'#94a3b8',fontSize:11}}>({c.cc})</span></td>
+              <td style={{padding:'6px 10px',textAlign:'right'}}>{c.cnt}</td>
+              <td style={{padding:'6px 10px',textAlign:'right',fontWeight:600}}>${Math.round(c.amt).toLocaleString()}</td>
+              <td style={{padding:'6px 10px',textAlign:'right',color:c.unpaid>0?'#dc2626':'#64748b'}}>${Math.round(c.unpaid).toLocaleString()}</td>
+              <td style={{padding:'6px 10px',textAlign:'right',color:'#64748b'}}>{c.cleared} / {c.cnt}</td>
+            </tr>
+            {exp&&<tr><td colSpan="5" style={{padding:0,background:'#faf5ff'}}>
+              <table style={{fontSize:11,width:'100%'}}>
+                <thead><tr>
+                  <th style={{padding:'4px 10px',textAlign:'left'}}>日期</th>
+                  <th style={{padding:'4px 10px',textAlign:'left'}}>單號</th>
+                  <th style={{padding:'4px 10px',textAlign:'right'}}>金額</th>
+                  <th style={{padding:'4px 10px',textAlign:'right'}}>已收</th>
+                  <th style={{padding:'4px 10px',textAlign:'right'}}>未收</th>
+                  <th style={{padding:'4px 10px',textAlign:'center'}}>狀態</th>
+                </tr></thead>
+                <tbody>{c.rows.sort((a,b)=>b.d.localeCompare(a.d)).map((d,j)=><tr key={j}>
+                  <td style={{padding:'3px 10px'}}>{d.d}</td>
+                  <td style={{padding:'3px 10px',color:'#64748b'}}>{d.dn}</td>
+                  <td style={{padding:'3px 10px',textAlign:'right'}}>${d.amt.toLocaleString()}</td>
+                  <td style={{padding:'3px 10px',textAlign:'right',color:'#64748b'}}>${d.paid.toLocaleString()}</td>
+                  <td style={{padding:'3px 10px',textAlign:'right',color:d.unpaid>0?'#dc2626':'#64748b',fontWeight:d.unpaid>0?600:400}}>${d.unpaid.toLocaleString()}</td>
+                  <td style={{padding:'3px 10px',textAlign:'center'}}>{d.cleared==='Y'?<span style={{color:'#059669',fontSize:10}}>✓ 已結清</span>:<span style={{color:'#dc2626',fontSize:10}}>未結清</span>}</td>
+                </tr>)}</tbody>
+              </table>
+            </td></tr>}
+          </React.Fragment>)})}</tbody>
+        </table>
+      </div>
+    </div>}
+
+    {/* 未收帳款表 */}
     <div className="card" style={{padding:0,overflow:'hidden'}}>
       <table style={{fontSize:12,width:'100%'}}>
         <thead style={{background:'#f8fafc'}}><tr>
@@ -1107,7 +1234,7 @@ function ARPage(){
           <th style={{padding:'8px 10px',textAlign:'right'}}>90+</th>
           <th style={{padding:'8px 10px',textAlign:'right'}}>最早日期</th>
         </tr></thead>
-        <tbody>{rows.map((r,i)=>{const open=expanded===r.cc;const det=open?details.filter(d=>d.cc===r.cc).sort((a,b)=>b.days-a.days):[];return(<React.Fragment key={r.cc}>
+        <tbody>{rows.map((r,i)=>{const open=expanded===r.cc;const det=open?filteredDetails.filter(d=>d.cc===r.cc).sort((a,b)=>b.days-a.days):[];return(<React.Fragment key={r.cc}>
           <tr onClick={()=>setExpanded(open?null:r.cc)} style={{cursor:'pointer',background:i%2?'#fafafa':'#fff',borderTop:'1px solid #f1f5f9'}}>
             <td style={{padding:'7px 10px',fontWeight:500}}>{open?'▼':'▶'} {r.name} <span style={{color:'#94a3b8',fontSize:11}}>({r.cc})</span></td>
             <td style={{padding:'7px 10px',color:'#64748b'}}>{r.sales}</td>
@@ -1133,7 +1260,7 @@ function ARPage(){
               <tbody>{det.map((d,j)=><tr key={j}>
                 <td style={{padding:'4px 10px'}}>{d.d}</td>
                 <td style={{padding:'4px 10px',color:'#64748b'}}>{d.dn}</td>
-                <td style={{padding:'4px 10px',color:'#64748b'}}>{d.inv}</td>
+                <td style={{padding:'4px 10px',color:d.inv?'#64748b':'#dc2626',fontWeight:d.inv?400:600}}>{d.inv||'(未開)'}</td>
                 <td style={{padding:'4px 10px',textAlign:'right'}}>${d.amt.toLocaleString()}</td>
                 <td style={{padding:'4px 10px',textAlign:'right',color:'#64748b'}}>${d.paid.toLocaleString()}</td>
                 <td style={{padding:'4px 10px',textAlign:'right',fontWeight:600,color:'#dc2626'}}>${d.unpaid.toLocaleString()}</td>
@@ -1143,7 +1270,7 @@ function ARPage(){
           </td></tr>}
         </React.Fragment>)})}</tbody>
       </table>
-      {rows.length===0&&<div style={{padding:40,textAlign:'center',color:'#94a3b8'}}>🎉 目前無未收帳款</div>}
+      {rows.length===0&&<div style={{padding:40,textAlign:'center',color:'#94a3b8'}}>🎉 此期間無未收帳款</div>}
     </div>
   </div>);
 }
