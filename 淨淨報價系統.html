@@ -897,7 +897,7 @@ function CustomerDashboard(){
           {MONTHS.map(m=><option key={m} value={m}>{m}</option>)}
         </select></F>
         <F l="類型"><select value={tierF} onChange={e=>setTierF(e.target.value)}>
-          <option value="all">全部</option><option value="dp">經銷商</option><option value="cp">特約商</option><option value="live">直播主</option><option value="sp">阿清</option><option value="gp">團購主</option>
+          <option value="all">全部</option><option value="dp">經銷商</option><option value="cp">特約商</option><option value="live">直播主</option><option value="sp">阿清</option>
         </select></F>
         <F l="搜尋"><input type="text" value={q} onChange={e=>setQ(e.target.value)} placeholder="客戶名稱" style={{width:160}}/></F>
         <F l={`選擇客戶（${filtered.length} 位有交易）`}>
@@ -994,7 +994,7 @@ function MasterClients(){
           {MONTHS.map(m=><option key={m} value={m}>{m}</option>)}
         </select></F>
         <F l="類型"><select value={tierF} onChange={e=>setTierF(e.target.value)}>
-          <option value="all">全部</option><option value="dp">經銷商</option><option value="cp">特約商</option><option value="live">直播主</option><option value="sp">阿清</option><option value="gp">團購主</option>
+          <option value="all">全部</option><option value="dp">經銷商</option><option value="cp">特約商</option><option value="live">直播主</option><option value="sp">阿清</option>
         </select></F>
         <F l="搜尋"><input type="text" value={q} onChange={e=>setQ(e.target.value)} placeholder="客戶名稱或代號" style={{width:180}}/></F>
         <F l="排序"><select value={sort} onChange={e=>setSort(e.target.value)}>
